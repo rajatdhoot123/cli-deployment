@@ -1,0 +1,4 @@
+{
+  "cwd": "/Users/rajat/projects/extension",
+  "commands": ["npm run build", "npm start"]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "cli-deployments",
+  "version": "0.0.5",
+  "description": "Package to deploy apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "deployment"
+  ],
+  "bin": "./index.js",
+  "type": "module",
+  "author": "Rajat Dhoot",
+  "license": "ISC",
+  "dependencies": {
+    "inquirer": "^9.2.20"
+  }
+}
