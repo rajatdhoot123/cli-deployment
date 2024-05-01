@@ -4,11 +4,14 @@ import { spawn } from "child_process";
 import inquirer from "inquirer";
 import fs from "fs";
 import path from "path";
+import chalk from "chalk";
 
 const configArg = process.argv.find((arg) => arg.startsWith("--config="));
 
 if (!configArg) {
-  console.error("Usage: npx cli-deployment --config=<path_to_config_file>");
+  console.error(
+    chalk.red("Usage: npx cli-deployment --config=<path_to_config_file>")
+  );
   process.exit(1);
 }
 
@@ -22,7 +25,7 @@ try {
   });
   config = JSON.parse(configJson);
 } catch (error) {
-  console.error(`Failed to read or parse config file: ${error}`);
+  console.error(chalk.red(`Failed to read or parse config file: ${error}`));
   process.exit(1);
 }
 
@@ -32,21 +35,21 @@ function runCommand(command, args, options = {}) {
 
     let output = ""; // To collect command output
     cmdProcess.stdout.on("data", (data) => {
-      console.log(data.toString()); // Log output
+      console.log(chalk.cyan(data.toString())); // Log output in blue
       output += data.toString();
     });
 
     cmdProcess.stderr.on("data", (data) => {
-      console.error(data.toString()); // Log error output
+      console.error(chalk.yellow(data.toString())); // Log error output in yellow
     });
 
     cmdProcess.on("error", (error) => {
-      reject(new Error(`Error: ${error.message}`));
+      reject(new Error(chalk.red(`Error: ${error.message}`))); // Error message in red
     });
 
     cmdProcess.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error(`Command failed with code ${code}`));
+        reject(new Error(chalk.red(`Command failed with code ${code}`))); // Command failure message in red
       } else {
         resolve(output); // Resolve with collected output
       }
@@ -65,7 +68,7 @@ async function switchBranch() {
     const currentBranch =
       branches.find((branch) => branch.startsWith("*")) || "";
 
-    console.log(`Current branch is: ${currentBranch}`);
+    console.log(chalk.green(`Current branch is: ${currentBranch}`)); // Current branch message in green
 
     const changeBranch = await inquirer.prompt([
       {
@@ -76,7 +79,7 @@ async function switchBranch() {
     ]);
 
     if (!changeBranch.change) {
-      console.log("No branch change requested.");
+      console.log(chalk.magenta("No branch change requested.")); // No change requested message in magenta
       return false; // Return false if no change
     }
 
@@ -92,10 +95,10 @@ async function switchBranch() {
     ]);
 
     await runCommand("git", ["checkout", answers.selectedBranch]);
-    console.log(`Switched to branch: ${answers.selectedBranch}`);
+    console.log(chalk.green(`Switched to branch: ${answers.selectedBranch}`)); // Switched to branch message in green
     return true; // Return true if branch was changed
   } catch (error) {
-    console.error("Error:", error);
+    console.error(chalk.red("Error:"), error);
     return false; // Ensure that failure to switch branches doesn't prevent subsequent command execution
   }
 }
@@ -106,13 +109,13 @@ async function runCommandsSequentially() {
 
     for (const command of config.commands) {
       const [cmd, ...args] = command.split(" ");
-      console.log(`Executing: ${cmd} ${args.join(" ")}`);
+      console.log(chalk.cyan(`Executing: ${cmd} ${args.join(" ")}`)); // Executing command message in cyan
       await runCommand(cmd, args, { cwd: config.cwd });
     }
 
-    console.log("All commands executed successfully.");
+    console.log(chalk.green("All commands executed successfully."));
   } catch (error) {
-    console.error(`Error executing commands: ${error.message}`);
+    console.error(chalk.red(`Error executing commands: ${error.message}`));
   }
 }
 

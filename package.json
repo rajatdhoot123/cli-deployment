@@ -1,6 +1,6 @@
 {
   "name": "cli-deployments",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "description": "Package to deploy apps",
   "main": "index.js",
   "scripts": {
@@ -14,6 +14,7 @@
   "author": "Rajat Dhoot",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^5.3.0",
     "inquirer": "^9.2.20"
   }
 }
