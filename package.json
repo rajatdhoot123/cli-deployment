@@ -1,6 +1,6 @@
 {
   "name": "cli-deployments",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "description": "Package to deploy apps",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.3.0",
-    "inquirer": "^9.2.20"
+    "inquirer": "^9.2.20",
+    "inquirer-autocomplete-prompt": "^3.0.1"
   }
 }

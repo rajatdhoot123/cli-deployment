@@ -5,6 +5,9 @@ import inquirer from "inquirer";
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
+import autocomplete from "inquirer-autocomplete-prompt";
+
+inquirer.registerPrompt("autocomplete", autocomplete);
 
 const configArg = process.argv.find((arg) => arg.startsWith("--config="));
 
@@ -35,7 +38,7 @@ function runCommand(command, args, options = {}) {
 
     let output = ""; // To collect command output
     cmdProcess.stdout.on("data", (data) => {
-      console.log(chalk.cyan(data.toString())); // Log output in blue
+      console.log(chalk.cyan(data.toString())); // Log output in cyan
       output += data.toString();
     });
 
@@ -57,6 +60,11 @@ function runCommand(command, args, options = {}) {
   });
 }
 
+async function fetchLatest() {
+  console.log(chalk.blue("Fetching the latest updates from the repository..."));
+  await runCommand("git", ["fetch", "--all"]);
+}
+
 async function switchBranch() {
   try {
     const branchesOutput = await runCommand("git", ["branch", "--list"]);
@@ -65,10 +73,14 @@ async function switchBranch() {
       .filter(Boolean)
       .map((branch) => branch.trim().replace("* ", ""));
 
-    const currentBranch =
-      branches.find((branch) => branch.startsWith("*")) || "";
+    const currentBranchMarker = branches.find((branch) =>
+      branch.startsWith("*")
+    );
+    const currentBranch = currentBranchMarker
+      ? currentBranchMarker.slice(2)
+      : "";
 
-    console.log(chalk.green(`Current branch is: ${currentBranch}`)); // Current branch message in green
+    console.log(chalk.green(`Current branch is: ${currentBranch}`));
 
     const changeBranch = await inquirer.prompt([
       {
@@ -79,32 +91,38 @@ async function switchBranch() {
     ]);
 
     if (!changeBranch.change) {
-      console.log(chalk.magenta("No branch change requested.")); // No change requested message in magenta
-      return false; // Return false if no change
+      console.log(chalk.magenta("No branch change requested."));
+      return false;
     }
-
-    const branchChoices = branches.filter((branch) => branch !== currentBranch);
 
     const answers = await inquirer.prompt([
       {
-        type: "list",
+        type: "autocomplete",
         name: "selectedBranch",
         message: "Select a branch to switch to:",
-        choices: branchChoices,
+        source: (answersSoFar, input) => {
+          input = input || "";
+          return Promise.resolve(
+            branches.filter(
+              (branch) => branch.includes(input) && branch !== currentBranch
+            )
+          );
+        },
       },
     ]);
 
     await runCommand("git", ["checkout", answers.selectedBranch]);
-    console.log(chalk.green(`Switched to branch: ${answers.selectedBranch}`)); // Switched to branch message in green
-    return true; // Return true if branch was changed
+    console.log(chalk.green(`Switched to branch: ${answers.selectedBranch}`));
+    return true;
   } catch (error) {
     console.error(chalk.red("Error:"), error);
-    return false; // Ensure that failure to switch branches doesn't prevent subsequent command execution
+    return false;
   }
 }
 
 async function runCommandsSequentially() {
   try {
+    await fetchLatest(); // Fetch latest updates before any other actions
     await switchBranch();
 
     for (const command of config.commands) {

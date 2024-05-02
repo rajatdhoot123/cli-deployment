@@ -25,7 +25,7 @@ Define your operational parameters in a JSON file, specifying the working direct
 To run the script, execute it with the path to your configuration file:
 
 ```bash
-npx cli-deployment --config=<path_to_config_file>
+npx cli-deployments --config=<path_to_config_file>
 ```
 
 ### Example
@@ -33,7 +33,7 @@ npx cli-deployment --config=<path_to_config_file>
 For a `deploy_config.json` located in the same directory as the script:
 
 ```bash
-npx cli-deployment --config=./deploy_config.json
+npx cli-deployments --config=./deploy_config.json
 ```
 
 ## License
